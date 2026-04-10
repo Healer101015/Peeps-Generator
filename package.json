@@ -1,0 +1,68 @@
+{
+    "name": "peeps-generator",
+    "version": "0.2.0",
+    "description": "Build and customize your open peeps illustrations right away!",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/CeamKrier/peeps-generator.git"
+    },
+    "keywords": [
+        "open peeps",
+        "react-peeps",
+        "illustration",
+        "generate",
+        "build",
+        "builder",
+        "generator"
+    ],
+    "author": "Emre Çakır",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/CeamKrier/peeps-generator/issues"
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@mantine/core": "^7.17.8",
+        "@mantine/hooks": "^7.17.8",
+        "file-saver": "^2.0.5",
+        "rc-slider": "^10.6.2",
+        "react": "^18.3.1",
+        "react-color": "^2.19.3",
+        "react-dom": "^18.3.1",
+        "react-fast-marquee": "^1.6.5",
+        "react-icons": "^4.12.0",
+        "react-moveable": "^0.54.2",
+        "react-peeps": "^0.1.10"
+    },
+    "devDependencies": {
+        "@types/file-saver": "^2.0.7",
+        "@types/node": "^20.14.9",
+        "@types/react": "^18.3.3",
+        "@types/react-color": "^3.0.13",
+        "@types/react-dom": "^18.3.0",
+        "@vitejs/plugin-react": "^4.3.1",
+        "typescript": "^5.5.2",
+        "vite": "^5.3.1"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "pnpm": {
+        "overrides": {
+            "esbuild": ">=0.25.0"
+        }
+    }
+}
