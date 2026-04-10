@@ -28,6 +28,7 @@
     "dependencies": {
         "@mantine/core": "^7.17.8",
         "@mantine/hooks": "^7.17.8",
+        "axios": "^1.15.0",
         "cors": "^2.8.6",
         "dotenv": "^17.4.1",
         "express": "^5.2.1",
