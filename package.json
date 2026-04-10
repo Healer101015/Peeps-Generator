@@ -28,7 +28,11 @@
     "dependencies": {
         "@mantine/core": "^7.17.8",
         "@mantine/hooks": "^7.17.8",
+        "cors": "^2.8.6",
+        "dotenv": "^17.4.1",
+        "express": "^5.2.1",
         "file-saver": "^2.0.5",
+        "mongoose": "^9.4.1",
         "rc-slider": "^10.6.2",
         "react": "^18.3.1",
         "react-color": "^2.19.3",
@@ -36,7 +40,8 @@
         "react-fast-marquee": "^1.6.5",
         "react-icons": "^4.12.0",
         "react-moveable": "^0.54.2",
-        "react-peeps": "^0.1.10"
+        "react-peeps": "^0.1.10",
+        "react-router-dom": "^7.14.0"
     },
     "devDependencies": {
         "@types/file-saver": "^2.0.7",
@@ -64,5 +69,7 @@
         "overrides": {
             "esbuild": ">=0.25.0"
         }
-    }
+    },
+    "main": "index.js",
+    "homepage": "https://github.com/CeamKrier/peeps-generator#readme"
 }

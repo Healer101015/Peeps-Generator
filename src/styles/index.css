@@ -18,7 +18,7 @@ div.selectionIndicator {
     margin-right: 15px;
 }
 
-.pieceListRadioButton:checked + div.selectionIndicator {
+.pieceListRadioButton:checked+div.selectionIndicator {
     visibility: visible;
 }
 
@@ -122,7 +122,7 @@ div.selectionIndicator {
     align-self: flex-start;
 }
 
-.rotateWrapper > div > div > div > div {
+.rotateWrapper>div>div>div>div {
     margin-top: 1em;
 }
 
@@ -397,11 +397,11 @@ div.selectionIndicator {
     display: flex;
 }
 
-.sectionList > li:first-child > div {
+.sectionList>li:first-child>div {
     border-top-right-radius: 1em;
 }
 
-.sectionList > li:last-child > div {
+.sectionList>li:last-child>div {
     border-bottom-right-radius: 1em;
 }
 
@@ -427,6 +427,7 @@ div.selectionIndicator {
     -ms-user-select: none;
     user-select: none;
 }
+
 .footer {
     position: absolute;
     left: 0;
@@ -435,16 +436,19 @@ div.selectionIndicator {
     margin: 0 auto;
     bottom: 1em;
 }
+
 .removeDefaultAnchorStyle {
     text-decoration: none;
     color: black;
 }
+
 .colorIndicator {
     position: relative;
     display: flex;
     width: fit-content;
     justify-content: center;
 }
+
 .colorSwatch {
     padding: 5px;
     background: #fff;
@@ -452,17 +456,20 @@ div.selectionIndicator {
     display: inline-block;
     cursor: pointer;
 }
+
 .pickedColor {
     width: 11.5em;
     height: 14px;
     border-radius: 2px;
 }
+
 .colorPopover {
     position: absolute;
     top: -0.5em;
     left: -10em;
     z-index: 2;
 }
+
 .colorCover {
     position: fixed;
     top: 0px;
@@ -470,18 +477,22 @@ div.selectionIndicator {
     bottom: 0px;
     left: 0px;
 }
+
 .block-picker {
     width: 22em !important;
     box-shadow: 3px 3px 10px 3px #ccc !important;
 }
+
 .basicPicker {
     display: flex;
     flex-direction: row-reverse;
 }
+
 .gradientPicker {
     display: flex;
     flex-direction: row-reverse;
 }
+
 .colorTypeChangeButton {
     position: relative;
     top: 0;
@@ -497,6 +508,7 @@ div.selectionIndicator {
     cursor: pointer;
     writing-mode: vertical-lr;
 }
+
 .gradientColorButton {
     background: linear-gradient(90deg, rgba(131, 58, 180, 1) 0%, rgba(253, 29, 29, 1) 60%, rgba(252, 176, 69, 1) 100%);
     color: white;
@@ -507,6 +519,7 @@ div.selectionIndicator {
     -ms-user-select: none;
     user-select: none;
 }
+
 .basicColorButton {
     background: #fdd365;
     color: black;
@@ -517,6 +530,7 @@ div.selectionIndicator {
     -ms-user-select: none;
     user-select: none;
 }
+
 .gradientBlock {
     width: 22em;
     background: rgb(255, 255, 255);
@@ -525,6 +539,7 @@ div.selectionIndicator {
     position: relative;
     height: 198px;
 }
+
 .gradientPreview {
     height: 130px;
     background: linear-gradient(45deg, gold, red);
@@ -534,24 +549,29 @@ div.selectionIndicator {
     justify-content: center;
     align-items: center;
 }
+
 .gradientInputWrapper {
     display: flex;
     margin-top: 0.5em;
     justify-content: space-evenly;
 }
-.gradientInputWrapper > div {
+
+.gradientInputWrapper>div {
     display: flex;
     justify-content: center;
 }
-div.gradientPreview > div > div:nth-child(3) > div:nth-child(2) {
+
+div.gradientPreview>div>div:nth-child(3)>div:nth-child(2) {
     margin-top: 1em;
     color: white;
 }
+
 .gradientColorBoxWrapper {
     display: flex;
     justify-content: space-around;
     margin-top: 0.5em;
 }
+
 .gradientColorBox {
     background: rgb(255, 212, 2);
     height: 22px;
@@ -565,18 +585,22 @@ div.gradientPreview > div > div:nth-child(3) > div:nth-child(2) {
     left: 0;
     margin: auto;
 }
+
 .chrome-picker {
     box-shadow: none !important;
     border-radius: 6px !important;
     width: 22em !important;
 }
-div.chrome-picker > div:nth-child(2) > div > div:nth-child(1) {
+
+div.chrome-picker>div:nth-child(2)>div>div:nth-child(1) {
     display: none !important;
 }
-div.chrome-picker > div:nth-child(1) {
+
+div.chrome-picker>div:nth-child(1) {
     border-radius: 6px 6px 0 0 !important;
     padding-bottom: 28% !important;
 }
+
 .signature {
     display: flex;
     gap: 0.5em;
@@ -596,7 +620,7 @@ div.chrome-picker > div:nth-child(1) {
     animation: sign 2s infinite linear;
 }
 
-.block-picker > div:nth-child(2) {
+.block-picker>div:nth-child(2) {
     height: 60px !important;
 }
 
@@ -642,6 +666,7 @@ div.chrome-picker > div:nth-child(1) {
         top: unset;
         display: none;
     }
+
     .header {
         display: none;
     }
@@ -649,32 +674,40 @@ div.chrome-picker > div:nth-child(1) {
     .container {
         position: relative;
     }
+
     #main {
         min-height: 710px;
         position: relative;
     }
+
     .svgWrapper svg {
         width: 300px !important;
         height: 300px !important;
     }
+
     .pieceText {
         display: none;
     }
+
     .header h1 {
         margin-top: unset;
     }
+
     .colorIndicator {
         left: unset;
         top: 0;
     }
+
     .colorPopover {
         top: -0.5em;
         right: unset;
         left: -10em;
     }
+
     .leftMenu {
         display: none;
     }
+
     .pieceList {
         width: 60%;
         height: 3.5em;
@@ -684,6 +717,7 @@ div.chrome-picker > div:nth-child(1) {
         right: 0;
         margin: auto;
     }
+
     .rightMenu {
         top: unset;
         right: 0;
@@ -692,21 +726,27 @@ div.chrome-picker > div:nth-child(1) {
         margin-bottom: 1em;
         position: relative;
     }
+
     .pieceListItem {
         display: table-cell;
     }
+
     .pieceListItem:hover {
         background-color: unset;
     }
+
     .pieceListWrapper {
         margin-top: 0em;
     }
+
     .listWrapper {
         flex-direction: column;
     }
+
     .pieceSectionItem {
         display: table-cell;
     }
+
     .sectionList {
         border-left: 0px solid #d4d4d4;
         box-shadow: 0px 5px 15px 4px #ccc;
@@ -715,28 +755,33 @@ div.chrome-picker > div:nth-child(1) {
         border-top-right-radius: 0;
         margin-top: 0;
     }
+
     .shuffleButton {
         right: 0;
         left: 0;
         margin: auto;
         margin-top: 1em;
     }
+
     .frameOptionsWrapper {
         right: 0;
         left: 0;
         margin: auto;
         margin-top: 1em;
     }
+
     .foregroundColorWrapper {
         right: 0;
         left: 0;
         margin: auto;
         margin-top: 1em;
     }
+
     .backgroundPickedColorIndicatior {
         width: 9.5em;
     }
-    .sectionList > li:first-child > div {
+
+    .sectionList>li:first-child>div {
         border-bottom-left-radius: 1em;
         border-top-right-radius: 0;
     }
@@ -744,17 +789,20 @@ div.chrome-picker > div:nth-child(1) {
     .pieceSectionButton {
         width: 5em;
     }
+
     .saveButtonWrapper {
         right: 0;
         left: 0;
         margin: auto;
         margin-top: 1em;
     }
+
     .svgWrapper {
         top: 0em;
         margin-top: 0;
         position: initial;
     }
+
     .footer {
         bottom: -4em;
         margin-bottom: 1em;
@@ -774,47 +822,60 @@ div.chrome-picker > div:nth-child(1) {
     .header {
         display: none;
     }
+
     .bmc-btn-container {
         left: 1rem;
     }
+
     #main {
         min-height: 630px;
         position: relative;
     }
+
     .header h1 {
         margin-top: unset;
         margin-bottom: unset;
     }
+
     .sectionList {
         overflow: hidden;
     }
+
     .shuffleButton {
         width: 90%;
     }
+
     .saveButtonWrapper {
         width: 90%;
     }
+
     .svgWrapper {
         top: -0.2em;
         margin-top: 0;
     }
+
     .saveButton {
         width: 7em;
     }
+
     .Body .pieceListSvg {
         width: 50px !important;
         height: 50px !important;
     }
+
     .Body .pieceListWrapper {
         margin-top: 0.5em;
     }
+
     .pieceSectionButton {
         font-size: 0.7rem;
         width: 5em;
     }
+
     .pieceSectionButton.Accessories span {
         font-size: 0;
     }
+
     .pieceSectionButton.Accessories span::before {
         content: "Accessory";
         font-size: 0.7rem;
@@ -823,16 +884,19 @@ div.chrome-picker > div:nth-child(1) {
     .pieceSectionButton.FacialHair span {
         font-size: 0;
     }
+
     .pieceSectionButton.FacialHair span::before {
         content: "Beard";
         font-size: 0.7rem;
     }
+
     .footer {
         max-width: 15rem;
         text-align: center;
         line-height: 1.5em;
         bottom: -7em;
     }
+
     .colorPopover {
         left: -9em;
     }
@@ -842,6 +906,7 @@ div.chrome-picker > div:nth-child(1) {
     .frameOptionsWrapper {
         width: 20em;
     }
+
     .foregroundColorWrapper {
         width: 20em;
     }
@@ -851,13 +916,16 @@ div.chrome-picker > div:nth-child(1) {
     .colorPopover {
         left: -8.2em;
     }
+
     .block-picker {
         width: 19em !important;
     }
+
     .gradientBlock {
         width: 19em;
     }
-    div.chrome-picker > div:nth-child(1) {
+
+    div.chrome-picker>div:nth-child(1) {
         padding-bottom: 33% !important;
     }
 }
@@ -866,24 +934,31 @@ div.chrome-picker > div:nth-child(1) {
     .pickedColor {
         width: 8em;
     }
+
     .block-picker {
         width: 17em !important;
     }
+
     .colorPopover {
         left: -8.2em;
     }
+
     .gradientBlock {
         width: 17em;
     }
-    div.chrome-picker > div:nth-child(1) {
+
+    div.chrome-picker>div:nth-child(1) {
         padding-bottom: 40% !important;
     }
+
     .foregroundColorWrapper {
         width: 15em;
     }
+
     .frameOptionsWrapper {
         width: 15em;
     }
+
     .backgroundPickedColorIndicatior {
         width: 6.5em;
     }
@@ -893,9 +968,11 @@ div.chrome-picker > div:nth-child(1) {
     0% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(0.8);
     }
+
     100% {
         transform: scale(1);
     }
@@ -906,6 +983,7 @@ div.chrome-picker > div:nth-child(1) {
         -webkit-filter: hue-rotate(0deg);
         filter: hue-rotate(0deg);
     }
+
     to {
         -webkit-filter: hue-rotate(-360deg);
         filter: hue-rotate(-360deg);

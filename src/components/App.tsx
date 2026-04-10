@@ -30,10 +30,10 @@ export const PeepsGenerator: React.FC = () => {
 
     useEffect(() => {
         /*
-		  Removing the event listeners in
-			small screens to prevent jumping behavior
-			when pressing on the illustration
-		 */
+          Removing the event listeners in
+            small screens to prevent jumping behavior
+            when pressing on the illustration
+         */
         if (window?.innerWidth < 1201) {
             illustrationRef.current?.removeEventListener("mouseenter", handleMouseEnter);
             illustrationRef.current?.removeEventListener("mouseleave", handleMouseLeave);
