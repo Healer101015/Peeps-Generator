@@ -6,23 +6,33 @@ import laying from '../assets/laying.svg';
 export const LoginPage: React.FC = () => {
     const { login, register } = useAuth();
     const [mode, setMode] = useState<'login' | 'register'>('login');
-    const [username, setUsername] = useState('');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async () => {
-        if (!username || !password) {
-            setError('Preencha todos os campos');
-            return;
+        if (mode === 'login') {
+            if (!email || !password) {
+                setError('Preencha todos os campos');
+                return;
+            }
+        } else {
+            if (!name || !email || !password) {
+                setError('Preencha todos os campos');
+                return;
+            }
         }
+
         setLoading(true);
         setError('');
+
         try {
             if (mode === 'login') {
-                await login(username, password);
+                await login(email, password);
             } else {
-                await register(username, password);
+                await register(name, email, password);
             }
         } catch (e: any) {
             setError(e.message || 'Erro desconhecido');
@@ -41,18 +51,34 @@ export const LoginPage: React.FC = () => {
 
             <div style={styles.rightPanel}>
                 <div style={styles.card}>
-                    <h2 style={styles.cardTitle}>{mode === 'login' ? 'Entre' : 'Cadastre-se'}</h2>
+                    <h2 style={styles.cardTitle}>
+                        {mode === 'login' ? 'Entre' : 'Cadastre-se'}
+                    </h2>
 
                     {error && <div style={styles.errorBanner}>{error}</div>}
 
-                    <label style={styles.label}>usuário</label>
+                    {mode === 'register' && (
+                        <>
+                            <label style={styles.label}>Nome</label>
+                            <input
+                                style={styles.input}
+                                type="text"
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+                                autoComplete="name"
+                            />
+                        </>
+                    )}
+
+                    <label style={styles.label}>Email</label>
                     <input
                         style={styles.input}
-                        type="text"
-                        value={username}
-                        onChange={e => setUsername(e.target.value)}
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                        autoComplete="username"
+                        autoComplete="email"
                     />
 
                     <label style={styles.label}>Senha</label>
@@ -62,14 +88,19 @@ export const LoginPage: React.FC = () => {
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                        autoComplete="current-password"
+                        autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                     />
 
                     <span
                         style={styles.forgotLink}
-                        onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+                        onClick={() => {
+                            setMode(mode === 'login' ? 'register' : 'login');
+                            setError('');
+                        }}
                     >
-                        {mode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre'}
+                        {mode === 'login'
+                            ? 'Não tem conta? Cadastre-se'
+                            : 'Já tem conta? Entre'}
                     </span>
 
                     <button
