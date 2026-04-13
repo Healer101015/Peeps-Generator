@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://peeps-generator.onrender.com/api';
 
 export interface Subtask {
     id: string;
