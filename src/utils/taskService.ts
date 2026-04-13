@@ -1,4 +1,4 @@
-const API_BASE = 'https://peeps-generator.onrender.com/api';
+const API_BASE = 'https://peeps-generator.onrender.com';
 
 export interface Subtask {
     id: string;

@@ -19,7 +19,7 @@ interface AuthContextProps {
 
 const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
 
-const API = 'https://peeps-generator.onrender.com/api';
+const API = 'https://peeps-generator.onrender.com';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<AuthUser | null>(null);
