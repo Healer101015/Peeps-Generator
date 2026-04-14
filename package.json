@@ -1,10 +1,10 @@
 {
-    "name": "peeps-generator",
+    "name": "Doodles-Tasks",
     "version": "0.2.0",
-    "description": "Build and customize your open peeps illustrations right away!",
+    "description": "Build and customize your tasks!",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/CeamKrier/peeps-generator.git"
+        "url": "git+https://github.com/Healer101015/Doodles-Tasks.git"
     },
     "keywords": [
         "open peeps",
