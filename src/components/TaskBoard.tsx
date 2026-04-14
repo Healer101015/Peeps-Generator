@@ -8,14 +8,16 @@ import { taskService, TaskAPI, TaskStats, RecurrenceConfig, Subtask, CreateTaskI
 type Priority = 'low' | 'medium' | 'high';
 type Filter = 'all' | 'active' | 'done' | 'recurring' | 'overdue' | 'pinned' | 'archived';
 type ActiveTab = 'tasks' | 'stats';
+type SortMode = 'date' | 'priority' | 'alpha';
 
 const priorityConfig = {
-    low: { label: 'Baixa', color: '#6BCB77', bg: '#f0fdf4' },
-    medium: { label: 'Média', color: '#FFD166', bg: '#fffbeb' },
-    high: { label: 'Alta', color: '#EF476F', bg: '#fff1f5' },
+    low: { label: 'Baixa', color: '#6BCB77', bg: '#f0fdf4', order: 3 },
+    medium: { label: 'Média', color: '#FFD166', bg: '#fffbeb', order: 2 },
+    high: { label: 'Alta', color: '#EF476F', bg: '#fff1f5', order: 1 },
 };
 
 const DAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const MAX_DATE = '2099-12-31';
 
 const generateId = () => Math.random().toString(36).slice(2, 10);
 
@@ -57,9 +59,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
 
     const addTag = () => {
         const t = tagInput.trim().toLowerCase();
-        if (t && !tags.includes(t)) {
-            setTags(prev => [...prev, t]);
-        }
+        if (t && !tags.includes(t)) setTags(prev => [...prev, t]);
         setTagInput('');
     };
 
@@ -109,15 +109,27 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
         }
     };
 
+    const recurringPreview = useMemo(() => {
+        if (!isRecurring) return '';
+        let text = 'Repete ';
+        if (recurrFreq === 'daily') text += 'todo dia';
+        else if (recurrFreq === 'weekly') {
+            if (recurrDays.length === 0) text += 'toda semana';
+            else text += `toda semana nas: ${recurrDays.map(d => DAY_LABELS[d]).join(', ')}`;
+        } else text += 'todo mês';
+        if (dueTime) text += ` às ${dueTime}`;
+        if (recurrEnd) text += ` até ${new Date(recurrEnd + 'T00:00:00').toLocaleDateString('pt-BR')}`;
+        return text;
+    }, [isRecurring, recurrFreq, recurrDays, dueTime, recurrEnd]);
+
     return (
         <div className="tb-modal-overlay" onClick={onClose}>
             <div className="tb-modal tb-modal-wide" onClick={e => e.stopPropagation()}>
                 <div className="tb-modal-header">
-                    <h2>{editTask ? '✏️ Editar Tarefa' : '✨ Nova Tarefa'}</h2>
+                    <h2>{editTask ? 'Editar Tarefa' : 'Nova Tarefa'}</h2>
                     <button className="tb-modal-close" onClick={onClose}>✕</button>
                 </div>
 
-                {/* Form tabs */}
                 <div className="tb-form-tabs">
                     {(['basic', 'recurring', 'subtasks', 'notes'] as const).map(tab => (
                         <button
@@ -126,16 +138,15 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
                             onClick={() => setActiveFormTab(tab)}
                             type="button"
                         >
-                            {tab === 'basic' && ' Básico'}
-                            {tab === 'recurring' && ' Recorrência'}
-                            {tab === 'subtasks' && ` Subtarefas${subtasks.length > 0 ? ` (${subtasks.length})` : ''}`}
-                            {tab === 'notes' && ' Notas'}
+                            {tab === 'basic' && 'Básico'}
+                            {tab === 'recurring' && `Recorrência${isRecurring ? ' ✓' : ''}`}
+                            {tab === 'subtasks' && `Subtarefas${subtasks.length > 0 ? ` (${subtasks.length})` : ''}`}
+                            {tab === 'notes' && 'Notas'}
                         </button>
                     ))}
                 </div>
 
                 <div className="tb-modal-body">
-                    {/* Basic tab */}
                     {activeFormTab === 'basic' && (
                         <>
                             <label className="tb-label">
@@ -146,6 +157,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
                                     onChange={e => setTitle(e.target.value)}
                                     placeholder="O que precisa ser feito?"
                                     autoFocus
+                                    maxLength={200}
                                 />
                             </label>
 
@@ -173,16 +185,29 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
                                 </label>
 
                                 <label className="tb-label">
-                                    Data / Hora limite
-                                    <input className="tb-input" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
-                                    <input className="tb-input" type="time" value={dueTime} onChange={e => setDueTime(e.target.value)} style={{ marginTop: 4 }} />
+                                    Data limite
+                                    <input
+                                        className="tb-input"
+                                        type="date"
+                                        value={dueDate}
+                                        onChange={e => setDueDate(e.target.value)}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        max={MAX_DATE}
+                                    />
+                                    <input
+                                        className="tb-input"
+                                        type="time"
+                                        value={dueTime}
+                                        onChange={e => setDueTime(e.target.value)}
+                                        style={{ marginTop: 4 }}
+                                    />
                                 </label>
                             </div>
 
                             <div className="tb-form-row">
                                 <label className="tb-label">
                                     Tempo estimado (min)
-                                    <input className="tb-input" type="number" min="0" value={estimatedMinutes} onChange={e => setEstimatedMinutes(e.target.value)} placeholder="ex: 30" />
+                                    <input className="tb-input" type="number" min="1" max="9999" value={estimatedMinutes} onChange={e => setEstimatedMinutes(e.target.value)} placeholder="ex: 30" />
                                 </label>
                                 <label className="tb-label" style={{ justifyContent: 'center' }}>
                                     Fixar no topo
@@ -191,12 +216,11 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
                                         className={`tb-pin-toggle ${pinned ? 'active' : ''}`}
                                         onClick={() => setPinned(p => !p)}
                                     >
-                                        {pinned ? '📌 Fixada' : '📌 Fixar'}
+                                        {pinned ? 'Fixada' : 'Fixar'}
                                     </button>
                                 </label>
                             </div>
 
-                            {/* Tags */}
                             <label className="tb-label">
                                 Tags
                                 <div className="tb-tag-input-row">
@@ -206,6 +230,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
                                         onChange={e => setTagInput(e.target.value)}
                                         onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag())}
                                         placeholder="Adicionar tag..."
+                                        maxLength={30}
                                     />
                                     <button type="button" className="tb-tag-add-btn" onClick={addTag}>+</button>
                                 </div>
@@ -223,7 +248,6 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
                         </>
                     )}
 
-                    {/* Recurring tab */}
                     {activeFormTab === 'recurring' && (
                         <div className="tb-recurring-section">
                             <label className="tb-label">
@@ -245,7 +269,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
                                         Frequência
                                         <select className="tb-input" value={recurrFreq} onChange={e => setRecurrFreq(e.target.value as any)}>
                                             <option value="daily">Diária</option>
-                                            <option value="weekly">Semanal</option>
+                                            <option value="weekly">Semanal (escolha os dias)</option>
                                             <option value="monthly">Mensal</option>
                                         </select>
                                     </label>
@@ -265,40 +289,49 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
                                                     </button>
                                                 ))}
                                             </div>
+                                            {recurrDays.length === 0 && (
+                                                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', marginTop: 4 }}>
+                                                    Selecione pelo menos um dia
+                                                </span>
+                                            )}
                                         </label>
                                     )}
 
                                     <div className="tb-form-row">
                                         <label className="tb-label">
-                                            Horário diário
+                                            Horário
                                             <input className="tb-input" type="time" value={dueTime} onChange={e => setDueTime(e.target.value)} />
                                         </label>
                                         <label className="tb-label">
                                             Repetir até
-                                            <input className="tb-input" type="date" value={recurrEnd} onChange={e => setRecurrEnd(e.target.value)} />
+                                            <input
+                                                className="tb-input"
+                                                type="date"
+                                                value={recurrEnd}
+                                                onChange={e => setRecurrEnd(e.target.value)}
+                                                min={new Date().toISOString().split('T')[0]}
+                                                max={MAX_DATE}
+                                            />
                                         </label>
                                     </div>
 
-                                    <div className="tb-recurring-preview">
-                                        <span>🔄 Esta tarefa se repetirá {recurrFreq === 'daily' ? 'todo dia' : recurrFreq === 'weekly' ? 'toda semana' : 'todo mês'}</span>
-                                        {recurrFreq === 'weekly' && recurrDays.length > 0 && (
-                                            <span> nos dias: {recurrDays.map(d => DAY_LABELS[d]).join(', ')}</span>
-                                        )}
-                                        {dueTime && <span> às {dueTime}</span>}
-                                    </div>
+                                    {recurringPreview && (
+                                        <div className="tb-recurring-preview">
+                                            {recurringPreview}
+                                        </div>
+                                    )}
                                 </>
                             )}
 
                             {!isRecurring && (
                                 <div className="tb-recurring-hint">
-                                    <span>🔄</span>
-                                    <p>Ative para criar tarefas que se repetem automaticamente — ex: buscar criança na escola todo dia às 13h.</p>
+                                    <span style={{ fontSize: 24 }}>↻</span>
+                                    <p>Ative para criar tarefas que se repetem automaticamente — ex: buscar criança toda segunda e sexta às 13h.</p>
                                 </div>
                             )}
                         </div>
                     )}
 
-                    {/* Subtasks tab */}
                     {activeFormTab === 'subtasks' && (
                         <div className="tb-subtasks-section">
                             <label className="tb-label">
@@ -310,6 +343,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
                                         onChange={e => setSubtaskInput(e.target.value)}
                                         onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addSubtask())}
                                         placeholder="Ex: Preparar material..."
+                                        maxLength={200}
                                     />
                                     <button type="button" className="tb-tag-add-btn" onClick={addSubtask}>+</button>
                                 </div>
@@ -325,20 +359,19 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
                                                 type="button"
                                                 className="tb-icon-btn"
                                                 onClick={() => setSubtasks(prev => prev.filter(x => x.id !== s.id))}
-                                            >🗑️</button>
+                                            >✕</button>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
                                 <div className="tb-recurring-hint">
-                                    <span>✅</span>
+                                    <span style={{ fontSize: 24 }}>✓</span>
                                     <p>Divida a tarefa em etapas menores para acompanhar o progresso.</p>
                                 </div>
                             )}
                         </div>
                     )}
 
-                    {/* Notes tab */}
                     {activeFormTab === 'notes' && (
                         <label className="tb-label">
                             Notas pessoais
@@ -348,6 +381,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
                                 onChange={e => setNotes(e.target.value)}
                                 rows={7}
                                 placeholder="Anotações, links, observações..."
+                                maxLength={2000}
                             />
                         </label>
                     )}
@@ -356,7 +390,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
                 <div className="tb-modal-footer">
                     <button className="tb-btn-cancel" onClick={onClose}>Cancelar</button>
                     <button className="tb-btn-save" onClick={handleSubmit} disabled={!title.trim() || saving}>
-                        {saving ? '...' : editTask ? 'Salvar alterações' : 'Criar tarefa'}
+                        {saving ? '...' : editTask ? 'Salvar' : 'Criar tarefa'}
                     </button>
                 </div>
             </div>
@@ -366,7 +400,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ editTask, onClose, onSave, onCrea
 
 // ─── Stats Panel ───────────────────────────────────────────────────────────────
 const StatsPanel: React.FC<{ stats: TaskStats | null; loading: boolean }> = ({ stats, loading }) => {
-    if (loading) return <div className="tb-loading"><div className="tb-spinner" /><span>Carregando estatísticas...</span></div>;
+    if (loading) return <div className="tb-loading"><div className="tb-spinner" /><span>Carregando...</span></div>;
     if (!stats) return null;
 
     const formatTime = (mins: number) => {
@@ -376,12 +410,12 @@ const StatsPanel: React.FC<{ stats: TaskStats | null; loading: boolean }> = ({ s
 
     return (
         <div className="tb-stats-panel">
-            <h2 className="tb-stats-title"> Estatísticas</h2>
+            <h2 className="tb-stats-title">Estatísticas</h2>
 
             <div className="tb-stats-grid">
                 <div className="tb-stat-card tb-stat-blue">
                     <div className="tb-stat-num">{stats.total}</div>
-                    <div className="tb-stat-label">Total de tarefas</div>
+                    <div className="tb-stat-label">Total</div>
                 </div>
                 <div className="tb-stat-card tb-stat-green">
                     <div className="tb-stat-num">{stats.completed}</div>
@@ -405,7 +439,6 @@ const StatsPanel: React.FC<{ stats: TaskStats | null; loading: boolean }> = ({ s
                 </div>
             </div>
 
-            {/* Completion rate */}
             <div className="tb-stats-completion">
                 <div className="tb-stats-completion-header">
                     <span>Taxa de conclusão</span>
@@ -416,7 +449,6 @@ const StatsPanel: React.FC<{ stats: TaskStats | null; loading: boolean }> = ({ s
                 </div>
             </div>
 
-            {/* By priority */}
             <div className="tb-stats-section">
                 <h3 className="tb-stats-section-title">Por prioridade</h3>
                 <div className="tb-prio-bars">
@@ -438,7 +470,6 @@ const StatsPanel: React.FC<{ stats: TaskStats | null; loading: boolean }> = ({ s
                 </div>
             </div>
 
-            {/* Top tags */}
             {stats.topTags.length > 0 && (
                 <div className="tb-stats-section">
                     <h3 className="tb-stats-section-title">Tags mais usadas</h3>
@@ -474,6 +505,9 @@ export const TaskBoard: React.FC = () => {
     const [logTimeTaskId, setLogTimeTaskId] = useState<string | null>(null);
     const [logMinutes, setLogMinutes] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const [sortMode, setSortMode] = useState<SortMode>('date');
+    const [focusMode, setFocusMode] = useState(false);
+    const [archivedCount, setArchivedCount] = useState(0);
 
     const loadTasks = useCallback(async () => {
         try {
@@ -481,6 +515,13 @@ export const TaskBoard: React.FC = () => {
             const data = await taskService.getAll({ archived: filter === 'archived' });
             setTasks(data);
             setError(null);
+            // Load archived count separately (only when NOT in archived view)
+            if (filter !== 'archived') {
+                const archived = await taskService.getAll({ archived: true });
+                setArchivedCount(archived.length);
+            } else {
+                setArchivedCount(data.length);
+            }
         } catch {
             setError('Não foi possível conectar ao servidor.');
         } finally {
@@ -494,7 +535,6 @@ export const TaskBoard: React.FC = () => {
             const data = await taskService.getStats();
             setStats(data);
         } catch {
-            // ignore
         } finally {
             setStatsLoading(false);
         }
@@ -545,7 +585,12 @@ export const TaskBoard: React.FC = () => {
     const handleArchive = async (id: string) => {
         try {
             const updated = await taskService.archive(id);
-            setTasks(prev => prev.filter(t => t._id !== updated._id));
+            if (filter === 'archived') {
+                setTasks(prev => prev.map(t => t._id === updated._id ? updated : t));
+            } else {
+                setTasks(prev => prev.filter(t => t._id !== updated._id));
+                setArchivedCount(c => c + (updated.archived ? 1 : -1));
+            }
         } catch { setError('Erro ao arquivar tarefa.'); }
     };
 
@@ -567,12 +612,61 @@ export const TaskBoard: React.FC = () => {
         } catch { setError('Erro ao registrar tempo.'); }
     };
 
+    // Feature: duplicate task
+    const handleDuplicate = async (task: TaskAPI) => {
+        try {
+            const input: CreateTaskInput = {
+                title: `${task.title} (cópia)`,
+                description: task.description,
+                priority: task.priority,
+                dueDate: task.dueDate,
+                tags: task.tags,
+                subtasks: task.subtasks.map(s => ({ id: generateId(), title: s.title, completed: false })),
+                notes: task.notes,
+                estimatedMinutes: task.estimatedMinutes,
+                pinned: false,
+                isRecurring: task.isRecurring,
+                recurrence: task.recurrence || undefined,
+            };
+            const created = await taskService.create(input);
+            setTasks(prev => [created, ...prev]);
+        } catch { setError('Erro ao duplicar tarefa.'); }
+    };
+
+    // Feature: export CSV
+    const handleExportCSV = useCallback(() => {
+        const rows = [
+            ['Título', 'Descrição', 'Prioridade', 'Status', 'Data Limite', 'Tags', 'Tempo Estimado', 'Tempo Registrado'],
+            ...tasks.map(t => [
+                `"${t.title.replace(/"/g, '""')}"`,
+                `"${(t.description || '').replace(/"/g, '""')}"`,
+                priorityConfig[t.priority]?.label || t.priority,
+                t.completed ? 'Concluída' : 'Pendente',
+                t.dueDate ? new Date(t.dueDate).toLocaleDateString('pt-BR') : '',
+                (t.tags || []).join('; '),
+                t.estimatedMinutes || '',
+                t.loggedMinutes || 0,
+            ].join(','))
+        ];
+        const csv = rows.join('\n');
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `tarefas_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }, [tasks]);
+
     const isOverdue = (due: string | null) => due ? new Date(due) < new Date() : false;
 
-    const filtered = useMemo(() => {
-        let list = tasks;
+    // Non-archived tasks for counting
+    const nonArchivedTasks = useMemo(() => tasks.filter(t => !t.archived), [tasks]);
+    const activeTasks = filter === 'archived' ? tasks : nonArchivedTasks;
 
-        // Search
+    const filtered = useMemo(() => {
+        let list = activeTasks;
+
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
             list = list.filter(t =>
@@ -582,31 +676,69 @@ export const TaskBoard: React.FC = () => {
             );
         }
 
-        switch (filter) {
-            case 'active': return list.filter(t => !t.completed);
-            case 'done': return list.filter(t => t.completed);
-            case 'recurring': return list.filter(t => t.isRecurring);
-            case 'overdue': return list.filter(t => isOverdue(t.dueDate) && !t.completed);
-            case 'pinned': return list.filter(t => t.pinned);
-            case 'archived': return list;
-            default: return list;
+        // Focus mode: hide completed tasks
+        if (focusMode) {
+            list = list.filter(t => !t.completed);
         }
-    }, [tasks, filter, searchQuery]);
 
-    const doneCount = tasks.filter(t => t.completed).length;
-    const total = tasks.length;
+        switch (filter) {
+            case 'active': list = list.filter(t => !t.completed); break;
+            case 'done': list = list.filter(t => t.completed); break;
+            case 'recurring': list = list.filter(t => t.isRecurring); break;
+            case 'overdue': list = list.filter(t => isOverdue(t.dueDate) && !t.completed); break;
+            case 'pinned': list = list.filter(t => t.pinned); break;
+            case 'archived': break;
+            default: break;
+        }
+
+        // Sort
+        const priorityOrder = { high: 1, medium: 2, low: 3 };
+        return [...list].sort((a, b) => {
+            // Pinned always first
+            if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+
+            if (sortMode === 'priority') {
+                const pDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+                if (pDiff !== 0) return pDiff;
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            }
+            if (sortMode === 'alpha') {
+                return a.title.localeCompare(b.title, 'pt-BR');
+            }
+            // date: overdue first, then by createdAt
+            if (isOverdue(a.dueDate) !== isOverdue(b.dueDate)) {
+                return isOverdue(a.dueDate) ? -1 : 1;
+            }
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+    }, [activeTasks, filter, searchQuery, sortMode, focusMode]);
+
+    const doneCount = nonArchivedTasks.filter(t => t.completed).length;
+    const total = nonArchivedTasks.length;
     const progress = total > 0 ? Math.round((doneCount / total) * 100) : 0;
-    const overdueCount = tasks.filter(t => isOverdue(t.dueDate) && !t.completed).length;
+    const overdueCount = nonArchivedTasks.filter(t => isOverdue(t.dueDate) && !t.completed).length;
+    const recurringCount = nonArchivedTasks.filter(t => t.isRecurring).length;
+    const pinnedCount = nonArchivedTasks.filter(t => t.pinned).length;
 
-    const filterConfig: { key: Filter; label: string; count: number }[] = [
+    const filterConfig: { key: Filter; label: string; count: number; show?: boolean }[] = [
         { key: 'all', label: 'Todas', count: total },
         { key: 'active', label: 'Pendentes', count: total - doneCount },
         { key: 'done', label: 'Feitas', count: doneCount },
-        { key: 'recurring', label: ' Recorrentes', count: tasks.filter(t => t.isRecurring).length },
-        { key: 'overdue', label: ' Atrasadas', count: overdueCount },
-        { key: 'pinned', label: ' Fixadas', count: tasks.filter(t => t.pinned).length },
-        { key: 'archived', label: ' Arquivadas', count: 0 },
+        { key: 'recurring', label: 'Recorrentes', count: recurringCount, show: recurringCount > 0 },
+        { key: 'overdue', label: 'Atrasadas', count: overdueCount, show: overdueCount > 0 },
+        { key: 'pinned', label: 'Fixadas', count: pinnedCount, show: pinnedCount > 0 },
+        { key: 'archived', label: 'Arquivadas', count: archivedCount, show: archivedCount > 0 },
     ];
+
+    const filterTitle: Record<Filter, string> = {
+        all: 'Minhas Tarefas',
+        active: 'Pendentes',
+        done: 'Concluídas',
+        recurring: 'Recorrentes',
+        overdue: 'Atrasadas',
+        pinned: 'Fixadas',
+        archived: 'Arquivadas',
+    };
 
     return (
         <div className="tb-root">
@@ -626,7 +758,7 @@ export const TaskBoard: React.FC = () => {
                 </div>
 
                 <div className="tb-user-info">
-                    <span className="tb-user-name">👋 {user?.name}</span>
+                    <span className="tb-user-name">Olá, {user?.name}</span>
                     <span className="tb-user-email">{user?.email}</span>
                 </div>
 
@@ -642,10 +774,10 @@ export const TaskBoard: React.FC = () => {
                 </div>
 
                 <div className="tb-stats">
-                    {filterConfig.map(f => (
+                    {filterConfig.filter(f => f.show !== false).map(f => (
                         <button
                             key={f.key}
-                            className={`tb-filter-btn ${filter === f.key ? 'active' : ''}`}
+                            className={`tb-filter-btn ${filter === f.key && activeTab === 'tasks' ? 'active' : ''}`}
                             onClick={() => { setFilter(f.key); setActiveTab('tasks'); }}
                         >
                             {f.label}
@@ -660,10 +792,11 @@ export const TaskBoard: React.FC = () => {
                     onClick={() => setActiveTab('stats')}
                 >
                     Estatísticas
+                    <span className="tb-filter-count">{total}</span>
                 </button>
 
                 <button className="tb-back-btn" onClick={() => dispatch({ type: 'SET_CHARACTER_CREATED', payload: false })}>
-                    ✏️ Editar Avatar
+                    Editar Avatar
                 </button>
                 <button className="tb-logout-btn" onClick={logout}>
                     Sair da conta
@@ -677,32 +810,57 @@ export const TaskBoard: React.FC = () => {
                     <>
                         <header className="tb-header">
                             <div>
-                                <h1 className="tb-title">
-                                    {filter === 'all' ? 'Minhas Tarefas' :
-                                        filter === 'active' ? 'Pendentes' :
-                                            filter === 'done' ? 'Concluídas' :
-                                                filter === 'recurring' ? ' Recorrentes' :
-                                                    filter === 'overdue' ? ' Atrasadas' :
-                                                        filter === 'pinned' ? ' Fixadas' : ' Arquivadas'}
-                                </h1>
-                                <p className="tb-subtitle">Organize seu dia com estilo ✨</p>
+                                <h1 className="tb-title">{filterTitle[filter]}</h1>
+                                <p className="tb-subtitle">
+                                    {filtered.length} tarefa{filtered.length !== 1 ? 's' : ''}
+                                    {focusMode ? ' · modo foco ativo' : ''}
+                                </p>
                             </div>
                             <button className="tb-add-btn" onClick={() => { setEditTask(null); setShowModal(true); }}>+ Nova</button>
                         </header>
 
-                        {/* Search */}
-                        <div className="tb-search-row">
+                        {/* Toolbar */}
+                        <div className="tb-toolbar">
                             <input
                                 className="tb-search-input"
-                                placeholder="🔍 Buscar tarefas, tags..."
+                                placeholder="Buscar tarefas, tags..."
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
+                                style={{ flex: 1 }}
                             />
+                            <div className="tb-toolbar-right">
+                                <select
+                                    className="tb-sort-select"
+                                    value={sortMode}
+                                    onChange={e => setSortMode(e.target.value as SortMode)}
+                                    title="Ordenar por"
+                                >
+                                    <option value="date">Data</option>
+                                    <option value="priority">Prioridade</option>
+                                    <option value="alpha">A–Z</option>
+                                </select>
+                                <button
+                                    className={`tb-focus-btn ${focusMode ? 'active' : ''}`}
+                                    onClick={() => setFocusMode(f => !f)}
+                                    title={focusMode ? 'Desativar modo foco' : 'Modo foco (esconde concluídas)'}
+                                >
+                                    {focusMode ? 'Foco ON' : 'Foco'}
+                                </button>
+                                {filter !== 'archived' && (
+                                    <button
+                                        className="tb-export-btn"
+                                        onClick={handleExportCSV}
+                                        title="Exportar como CSV"
+                                    >
+                                        CSV
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         {error && (
                             <div className="tb-error">
-                                ⚠️ {error}
+                                {error}
                                 <button onClick={() => setError(null)}>✕</button>
                             </div>
                         )}
@@ -711,13 +869,16 @@ export const TaskBoard: React.FC = () => {
                             <div className="tb-loading"><div className="tb-spinner" /><span>Carregando...</span></div>
                         ) : filtered.length === 0 ? (
                             <div className="tb-empty">
-                                <div className="tb-empty-icon">{filter === 'recurring' ? '🔄' : filter === 'archived' ? '📦' : '📋'}</div>
+                                <div className="tb-empty-icon">
+                                    {filter === 'recurring' ? '↻' : filter === 'archived' ? '□' : '◻'}
+                                </div>
                                 <p>{
                                     filter === 'done' ? 'Nenhuma tarefa concluída.' :
                                         filter === 'recurring' ? 'Nenhuma tarefa recorrente.' :
                                             filter === 'archived' ? 'Nenhuma tarefa arquivada.' :
-                                                searchQuery ? 'Nenhuma tarefa encontrada.' :
-                                                    'Nenhuma tarefa. Que tal criar uma?'
+                                                focusMode ? 'Nenhuma tarefa pendente.' :
+                                                    searchQuery ? 'Nenhuma tarefa encontrada.' :
+                                                        'Nenhuma tarefa. Que tal criar uma?'
                                 }</p>
                                 {filter === 'all' && !searchQuery && (
                                     <button className="tb-add-btn small" onClick={() => setShowModal(true)}>Criar primeira tarefa</button>
@@ -745,8 +906,8 @@ export const TaskBoard: React.FC = () => {
 
                                                 <div className="tb-task-body" onClick={() => setExpandedTask(isExpanded ? null : task._id)}>
                                                     <div className="tb-task-top">
-                                                        {task.pinned && <span className="tb-pin-badge">📌</span>}
-                                                        {task.isRecurring && <span className="tb-recurring-badge">🔄</span>}
+                                                        {task.pinned && <span className="tb-pin-badge" style={{ fontSize: 12 }}>●</span>}
+                                                        {task.isRecurring && <span className="tb-recurring-badge" style={{ fontSize: 12 }}>↻</span>}
                                                         <span className="tb-task-title">{task.title}</span>
                                                         <span className="tb-priority-tag" style={{ background: p.bg, color: p.color }}>{p.label}</span>
                                                     </div>
@@ -762,40 +923,39 @@ export const TaskBoard: React.FC = () => {
                                                     <div className="tb-task-meta">
                                                         {task.dueDate && (
                                                             <span className={`tb-due ${overdue ? 'overdue' : ''}`}>
-                                                                📅 {new Date(task.dueDate).toLocaleDateString('pt-BR')}
+                                                                {new Date(task.dueDate).toLocaleDateString('pt-BR')}
                                                                 {task.recurrence?.timeOfDay && ` às ${task.recurrence.timeOfDay}`}
                                                                 {overdue && ' · Atrasada'}
                                                             </span>
                                                         )}
                                                         {subtasksTotal > 0 && (
                                                             <span className="tb-subtask-progress">
-                                                                ✅ {subtasksDone}/{subtasksTotal}
+                                                                {subtasksDone}/{subtasksTotal} subtarefas
                                                             </span>
                                                         )}
                                                         {task.estimatedMinutes && (
                                                             <span className="tb-time-badge">
-                                                                ⏱ {task.loggedMinutes || 0}/{task.estimatedMinutes}min
+                                                                {task.loggedMinutes || 0}/{task.estimatedMinutes}min
                                                             </span>
                                                         )}
                                                     </div>
                                                 </div>
 
                                                 <div className="tb-task-actions">
-                                                    <button className="tb-icon-btn" title="Editar" onClick={() => { setEditTask(task); setShowModal(true); }}>✏️</button>
-                                                    <button className="tb-icon-btn" title={task.pinned ? 'Desafixar' : 'Fixar'} onClick={() => handlePin(task._id)}>📌</button>
-                                                    <button className="tb-icon-btn" title="Arquivar" onClick={() => handleArchive(task._id)}>📦</button>
-                                                    <button className="tb-icon-btn" title="Deletar" onClick={() => handleDelete(task._id)}>🗑️</button>
+                                                    <button className="tb-icon-btn" title="Editar" onClick={() => { setEditTask(task); setShowModal(true); }}>✏</button>
+                                                    <button className="tb-icon-btn" title="Duplicar" onClick={() => handleDuplicate(task)}>⊕</button>
+                                                    <button className="tb-icon-btn" title={task.pinned ? 'Desafixar' : 'Fixar'} onClick={() => handlePin(task._id)}>●</button>
+                                                    <button className="tb-icon-btn" title={task.archived ? 'Desarquivar' : 'Arquivar'} onClick={() => handleArchive(task._id)}>□</button>
+                                                    <button className="tb-icon-btn" title="Deletar" onClick={() => handleDelete(task._id)}>✕</button>
                                                 </div>
                                             </div>
 
-                                            {/* Expanded section */}
                                             {isExpanded && (
                                                 <div className="tb-task-expanded">
                                                     {task.description && (
                                                         <p className="tb-task-desc">{task.description}</p>
                                                     )}
 
-                                                    {/* Subtasks */}
                                                     {task.subtasks?.length > 0 && (
                                                         <div className="tb-subtasks">
                                                             <div className="tb-subtasks-header">
@@ -818,30 +978,28 @@ export const TaskBoard: React.FC = () => {
                                                         </div>
                                                     )}
 
-                                                    {/* Notes */}
                                                     {task.notes && (
                                                         <div className="tb-task-notes">
-                                                            <span className="tb-notes-label">📝 Notas:</span>
+                                                            <span className="tb-notes-label">Notas:</span>
                                                             <p>{task.notes}</p>
                                                         </div>
                                                     )}
 
-                                                    {/* Recurring info */}
                                                     {task.isRecurring && task.recurrence && (
                                                         <div className="tb-recurring-info">
-                                                            <span>🔄 Recorrência: {
+                                                            Recorrência: {
                                                                 task.recurrence.frequency === 'daily' ? 'Diária' :
-                                                                    task.recurrence.frequency === 'weekly' ? `Semanal (${(task.recurrence.daysOfWeek || []).map(d => DAY_LABELS[d]).join(', ')})` :
+                                                                    task.recurrence.frequency === 'weekly' ?
+                                                                        `Semanal${task.recurrence.daysOfWeek?.length ? ` (${task.recurrence.daysOfWeek.map(d => DAY_LABELS[d]).join(', ')})` : ''}` :
                                                                         'Mensal'
-                                                            }</span>
-                                                            {task.recurrence.timeOfDay && <span> · ⏰ {task.recurrence.timeOfDay}</span>}
+                                                            }
+                                                            {task.recurrence.timeOfDay && ` · ${task.recurrence.timeOfDay}`}
                                                             {task.recurrence.completionCount !== undefined && task.recurrence.completionCount > 0 && (
                                                                 <span> · Concluída {task.recurrence.completionCount}x</span>
                                                             )}
                                                         </div>
                                                     )}
 
-                                                    {/* Log time */}
                                                     <div className="tb-log-time-row">
                                                         {logTimeTaskId === task._id ? (
                                                             <>
@@ -849,6 +1007,7 @@ export const TaskBoard: React.FC = () => {
                                                                     className="tb-input tb-log-time-input"
                                                                     type="number"
                                                                     min="1"
+                                                                    max="9999"
                                                                     placeholder="Minutos"
                                                                     value={logMinutes}
                                                                     onChange={e => setLogMinutes(e.target.value)}
@@ -863,7 +1022,7 @@ export const TaskBoard: React.FC = () => {
                                                                 className="tb-log-time-btn"
                                                                 onClick={() => { setLogTimeTaskId(task._id); setLogMinutes(''); }}
                                                             >
-                                                                ⏱ Registrar tempo {task.loggedMinutes > 0 ? `(${task.loggedMinutes}min já registrado)` : ''}
+                                                                Registrar tempo {task.loggedMinutes > 0 ? `(${task.loggedMinutes}min)` : ''}
                                                             </button>
                                                         )}
                                                     </div>
