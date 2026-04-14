@@ -4,6 +4,7 @@ import { useProvider } from '../utils/contextProvider';
 import { useAuth } from '../utils/authContext';
 import { adjustPeepsViewbox } from '../utils/viewbox';
 import { taskService, TaskAPI, TaskStats, RecurrenceConfig, Subtask, CreateTaskInput } from '../utils/taskService';
+import { NotificationPanel } from './NotificationPanel';
 
 type Priority = 'low' | 'medium' | 'high';
 type Filter = 'all' | 'active' | 'done' | 'recurring' | 'overdue' | 'pinned' | 'archived';
@@ -794,6 +795,8 @@ export const TaskBoard: React.FC = () => {
                     Estatísticas
                     <span className="tb-filter-count">{total}</span>
                 </button>
+
+                <NotificationPanel tasks={tasks} />
 
                 <button className="tb-back-btn" onClick={() => dispatch({ type: 'SET_CHARACTER_CREATED', payload: false })}>
                     Editar Avatar
