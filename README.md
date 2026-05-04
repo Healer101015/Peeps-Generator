@@ -175,7 +175,7 @@ Doodles-Tasks/
           <a href="#" title="Ideas, Planning, & Feedback">🤔</a> 
           <a href="#" title="Talks">📢</a>
       </td>
-        <td align="center" valign="top" width="14.28%"><a href="https://github.com/maariana-gen"><img src="./src/assets/1772132841057.jfif" width="100px;" alt="Mariana de Oliveira Soares"/><br /><sub><b>Mariana de Oliveira Soares</b></sub>
+        <td align="center" valign="top" width="14.28%"><a href="https://github.com/maariana-gen" target="_blank" ><img src="./src/assets/1772132841057.jfif" width="100px;" alt="Mariana de Oliveira Soares"/><br /><sub><b>Mariana de Oliveira Soares</b></sub>
       </a><br />
           <a href="#" title="Code">💻</a>
           <a href="#" title="Reviewed Pull Requests">👀</a> 
