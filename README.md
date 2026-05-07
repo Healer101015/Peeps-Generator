@@ -2,7 +2,7 @@
   <h1>🎨 Doodles Tasks</h1> 
   <img
     src="./src/assets/peep.svg"
-    alt="foto do criador"
+    alt="image header"
     height="200"
     width="200"
   />
